@@ -15,7 +15,7 @@
 
 ## 🔧 Cài đặt
 1. Cài tiện ích quản lý userscript: [Tampermonkey](https://www.tampermonkey.net/) hoặc Violent Monkey.
-2. [**Cài đặt Script**]([https://github.com/Ashura170606/Script-OpenAI-translator/raw/refs/heads/main/src/userscript.user.js](https://raw.githubusercontent.com/Ashura170606/Script-OpenAI-translator/main/src/userscript.user.js))
+2. [**Cài đặt Script**](https://raw.githubusercontent.com/Ashura170606/Script-OpenAI-translator/main/src/userscript.user.js)
 3. Nhập API key của OpenAI
 
 ## 💻 Sử dụng

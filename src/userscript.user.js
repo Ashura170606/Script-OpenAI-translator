@@ -9,6 +9,7 @@
 // @grant        GM_getValue
 // @grant        GM_addStyle
 // @grant        GM_registerMenuCommand
+// @grant        GM_xmlhttpRequest
 // ==/UserScript==
 
 (function () {
@@ -119,29 +120,44 @@
       ],
     };
 
-    let resp = await fetch(endpoint, {
+    return new Promise((resolve, reject) => {
+    GM_xmlhttpRequest({
       method: "POST",
+      url: endpoint,
       headers: {
         "Authorization": "Bearer " + apiKey,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(body),
+      data: JSON.stringify(body),
+      onload: (response) => {
+        if (response.status === 401) {
+          reject(new Error("Unauthorized: Invalid API key"));
+          return;
+        }
+        if (response.status === 429) {
+          reject(new Error("Rate limited"));
+          return;
+        }
+        if (response.status < 200 || response.status >= 300) {
+          reject(new Error("Network/API Error: " + response.status));
+          return;
+        }
+
+        try {
+          const data = JSON.parse(response.responseText);
+          if (data.error) {
+            reject(new Error("OpenAI Error: " + data.error.message));
+          } else {
+            resolve(data.choices[0].message.content.trim());
+          }
+        } catch (err) {
+          reject(new Error("Invalid JSON or bad response"));
+        }
+      },
+      onerror: (err) => reject(err),
     });
-
-    if (resp.status === 401) throw new Error("Unauthorized: Invalid API key");
-    if (resp.status === 429) throw new Error("Rate limited");
-
-    if (!resp.ok) throw new Error("Network/API Error: " + resp.status);
-
-    let data = await resp.json();
-    if (data.error) throw new Error("OpenAI Error: " + data.error.message);
-
-    try {
-      return data.choices[0].message.content.trim();
-    } catch {
-      throw new Error("Invalid response from OpenAI API");
-    }
-  }
+  });
+}
 
   function showStatusBubble(rect, message) {
     const bubble = document.createElement("div");

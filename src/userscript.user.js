@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Translate Selection to Vietnamese (OpenAI, Dark Theme, Auto Close Overlay Fixed)
 // @description  Translate selected text into Vietnamese via OpenAI API with Shift trigger, dark overlay, draggable popup, auto-close on outside click.
-// @namespace    https://your-namespace.example
+// @namespace    https://ashura170606.github.io
 // @version      1.3
 // @author       You
 // @match        *://*/*

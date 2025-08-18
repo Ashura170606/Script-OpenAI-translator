@@ -15,7 +15,10 @@
 (function () {
   'use strict';
 
-  const HOTKEY = 'Shift';
+  let HOTKEY = GM_getValue("translate_hotkey", "Shift") ;
+  let TARGET_LANG = GM_getValue("translate_target_lang", "Vietnamese"); // mặc định
+
+
   const MODEL = 'gpt-4o-mini';
   const MAX_CHUNK_SIZE = 4000;
 
@@ -24,6 +27,37 @@
   let dragData = null;
 
   GM_registerMenuCommand("OpenAI — Set/Update API Key", promptForApiKey);
+  GM_registerMenuCommand("Translate — Set Hotkey", promptForHotkey);
+  GM_registerMenuCommand("Translate — Set Target Language", chooseTargetLanguage);
+
+function chooseTargetLanguage() {
+  const LANGUAGES = ["Vietnamese", "English", "Japanese", "French", "Chinese", "Korean", "German", "Spanish"];
+  const choice = prompt(
+    "Choose target language:\n" + 
+    LANGUAGES.map((l, i) => `${i + 1}. ${l}`).join("\n") +
+    `\n\nCurrent: ${TARGET_LANG}\n\nEnter number (1-${LANGUAGES.length}):`
+  );
+
+  if (!choice) return;
+  const idx = parseInt(choice, 10) - 1;
+  if (idx >= 0 && idx < LANGUAGES.length) {
+    TARGET_LANG = LANGUAGES[idx];
+    GM_setValue("translate_target_lang", TARGET_LANG);
+    alert("Target language set to: " + TARGET_LANG);
+  } else {
+    alert("Invalid choice.");
+  }
+}
+
+function promptForHotkey() {
+  const key = prompt("Enter the hotkey you want to use (e.g. Shift, Control, Alt, T):", HOTKEY);
+  if (key && key.trim()) {
+    HOTKEY = key.trim();
+    GM_setValue("translate_hotkey", HOTKEY);
+    alert("Hotkey set to: " + HOTKEY);
+  }
+}
+
 
   async function getApiKey() {
     let key = await GM_getValue("openai_api_key", null);
@@ -106,12 +140,12 @@
         {
           role: "system",
           content:
-            "Bạn là một dịch giả chuyên dịch tài liệu lập trình. Hãy dịch đoạn văn sang tiếng Việt tự nhiên, dễ hiểu. \
+            "Bạn là một dịch giả chuyên dịch tài liệu lập trình. Hãy dịch đoạn văn sang " + TARGET_LANG + " tự nhiên, dễ hiểu. \
   QUAN TRỌNG: \
   - Giữ nguyên các thuật ngữ/ký hiệu kỹ thuật lập trình (ví dụ: list, dictionary, tuple, array, class, object, function, API, library, framework...). \
-  - Nếu cần, có thể thêm giải thích ngắn gọn bằng tiếng Việt trong ngoặc để người đọc dễ hiểu, nhưng KHÔNG thay thế hay dịch hẳn các từ khóa này. \
+  - Nếu cần, có thể thêm giải thích ngắn gọn bằng " + TARGET_LANG + " trong ngoặc để người đọc dễ hiểu, nhưng KHÔNG thay thế hay dịch hẳn các từ khóa này. \
   - Không dịch code block hoặc inline code, giữ nguyên cú pháp. \
-  - Ưu tiên văn phong rõ ràng, gần gũi, nhưng không được dịch thô. ",
+  - Ưu tiên văn phong rõ ràng, gần gũi, nhưng không được dịch thô.",
         },
         {
           role: "user",
